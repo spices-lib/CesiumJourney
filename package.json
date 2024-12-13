@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "vite": "^5.1.8",
+    "dat.gui": "^0.7.9",
+    "stats.js": "^0.17.0",
     "vite-plugin-static-copy": "^1.0.0",
     "cesium": "^1.124.0"
   }

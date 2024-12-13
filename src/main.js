@@ -1,7 +1,9 @@
-import {CustomShader, Terrain, Viewer} from "cesium";
+import {CustomShader, Terrain, Tonemapper, Viewer} from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./style.css";
 import * as Cesium from "cesium";
+import Stats from "stats.js/src/Stats.js";
+import { SpicesSkyAtmosphere, SpicesFog, SpicesPostProcessStages, SpicesDirectionalLight } from "./scene.js";
 
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiYWY0MTM0MS0xOGU1LTQxZjUtYTllYy1iYjRkYjJkYzBlMDEiLCJpZCI6NTQ2NDksImlhdCI6MTYyMDEwMjgzOX0.cojh0KQbdymUPmIWIyCU8nCey6OrLQUk50aeirVpXtI";
 
@@ -16,8 +18,16 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
     globe: false,
 });
 
-// Enable rendering the sky
-viewer.scene.skyAtmosphere.show = true;
+// Rendering Settings
+viewer.scene.skyAtmosphere = new SpicesSkyAtmosphere().instance
+viewer.scene.fog = new SpicesFog().instance
+viewer.scene.postProcessStages = new SpicesPostProcessStages().instance
+viewer.scene.shadowMap.enabled = true
+viewer.scene.shadowMap.softShadows = true
+viewer.scene.shadowMap.size = 8192
+viewer.scene.light = new SpicesDirectionalLight().instance
+
+console.log(viewer.scene)
 
 const shader = new CustomShader({
     uniforms: {},
@@ -36,21 +46,14 @@ const shader = new CustomShader({
 })
 
 // Add Photorealistic 3D Tiles
-try {
-    const tileset = await Cesium.createGooglePhotorealistic3DTileset({
-        // Only the Google Geocoder can be used with Google Photorealistic 3D Tiles.  Set the `geocode` property of the viewer constructor options to IonGeocodeProviderType.GOOGLE.
-        onlyUsingWithGoogleGeocoder: true,
-    })
-    viewer.scene.primitives.add(tileset)
-    tileset.customShader = shader
-} catch (error) {
-    console.log(`Error loading Photorealistic 3D Tiles tileset.
-  ${error}`)
-}
+const tileset = await Cesium.createGooglePhotorealistic3DTileset({
+    // Only the Google Geocoder can be used with Google Photorealistic 3D Tiles.  Set the `geocode` property of the viewer constructor options to IonGeocodeProviderType.GOOGLE.
+    onlyUsingWithGoogleGeocoder: true,
+})
+viewer.scene.primitives.add(tileset)
+tileset.customShader = shader
 
-
-
-
+console.log(tileset)
 
 // Point the camera at the Googleplex
 viewer.scene.camera.setView({
@@ -66,3 +69,28 @@ viewer.scene.camera.setView({
     ),
 });
 
+viewer.scene.requestRenderMode = true;
+
+let stats = new Stats()
+stats.showPanel(1);
+document.body.appendChild( stats.dom );
+
+
+viewer.scene.preUpdate.addEventListener(()=>{
+
+})
+
+const tick = () => {
+
+    stats.begin();
+
+    viewer.scene.requestRender()
+
+    viewer
+
+    stats.end();
+
+    window.requestAnimationFrame(tick)
+}
+
+tick()
