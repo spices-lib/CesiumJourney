@@ -8401,7 +8401,7 @@ export namespace ITwinPlatform {
     enum ExportType {
     }
     /**
-     * Types of Reality data
+     * Types of Reality data. This is a partial list of types we know we can support
      */
     enum RealityDataType {
     }
@@ -18491,6 +18491,7 @@ export function defaultValue(a: any, b: any): any;
  */
 export function defined<Type>(value: Type): value is NonNullable<Type>;
 
+
 /**
  * Destroys an object.  Each of the object's functions, including functions in its prototype,
  * is replaced with a function that throws a {@link DeveloperError}, except for the object's
@@ -22746,6 +22747,7 @@ export namespace ModelGraphics {
      * @property [colorBlendMode = ColorBlendMode.HIGHLIGHT] - An enum Property specifying how the color blends with the model.
      * @property [colorBlendAmount = 0.5] - A numeric Property specifying the color strength when the <code>colorBlendMode</code> is <code>MIX</code>. A value of 0.0 results in the model's rendered color while a value of 1.0 results in a solid color, with any value in-between resulting in a mix of the two.
      * @property [imageBasedLightingFactor = new Cartesian2(1.0, 1.0)] - A property specifying the contribution from diffuse and specular image-based lighting.
+     * @property [environmentMapOptions] - The properties for managing dynamic environment maps on this entity.
      * @property [lightColor] - A property specifying the light color when shading the model. When <code>undefined</code> the scene's light color is used instead.
      * @property [distanceDisplayCondition] - A Property specifying at what distance from the camera that this model will be displayed.
      * @property [nodeTransformations] - An object, where keys are names of nodes, and values are {@link TranslationRotationScale} Properties describing the transformation to apply to that node. The transformation is applied after the node's existing transformation as specified in the glTF, and does not replace the node's existing transformation.
@@ -22771,6 +22773,9 @@ export namespace ModelGraphics {
         colorBlendMode?: Property | ColorBlendMode;
         colorBlendAmount?: Property | number;
         imageBasedLightingFactor?: Property | Cartesian2;
+        environmentMapOptions?: PropertyBag | {
+            [key: string]: any;
+        };
         lightColor?: Property | Color;
         distanceDisplayCondition?: Property | DistanceDisplayCondition;
         nodeTransformations?: PropertyBag | {
@@ -22878,6 +22883,10 @@ export class ModelGraphics {
      * A property specifying the {@link Cartesian2} used to scale the diffuse and specular image-based lighting contribution to the final color.
      */
     imageBasedLightingFactor: Property | undefined;
+    /**
+     * Gets or sets the {@link DynamicEnvironmentMapManager.ConstructorOptions} to apply to this model. This is represented as an {@link PropertyBag}.
+     */
+    environmentMapOptions: PropertyBag;
     /**
      * A property specifying the {@link Cartesian3} light color when shading the model. When <code>undefined</code> the scene's light color is used instead.
      */
@@ -29237,6 +29246,7 @@ export namespace Cesium3DTileset {
      * @property [pointCloudShading] - Options for constructing a {@link PointCloudShading} object to control point attenuation based on geometric error and lighting.
      * @property [lightColor] - The light color when shading models. When <code>undefined</code> the scene's light color is used instead.
      * @property [imageBasedLighting] - The properties for managing image-based lighting for this tileset.
+     * @property [environmentMapOptions] - The properties for managing dynamic environment maps on this tileset.
      * @property [backFaceCulling = true] - Whether to cull back-facing geometry. When true, back face culling is determined by the glTF material's doubleSided property; when false, back face culling is disabled.
      * @property [enableShowOutline = true] - Whether to enable outlines for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. This can be set to false to avoid the additional processing of geometry at load time. When false, the showOutlines and outlineColor options are ignored.
      * @property [showOutline = true] - Whether to display the outline for models using the {@link https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/CESIUM_primitive_outline|CESIUM_primitive_outline} extension. When true, outlines are displayed. When false, outlines are not displayed.
@@ -29262,7 +29272,6 @@ export namespace Cesium3DTileset {
      * @property [debugShowRenderingStatistics = false] - For debugging only. When true, draws labels to indicate the number of commands, points, triangles and features for each tile.
      * @property [debugShowMemoryUsage = false] - For debugging only. When true, draws labels to indicate the texture and geometry memory in megabytes used by each tile.
      * @property [debugShowUrl = false] - For debugging only. When true, draws labels to indicate the url of each tile.
-     * @param [options.environmentMapOptions] - The properties for managing dynamic environment maps on this model.
      */
     type ConstructorOptions = {
         show?: boolean;
@@ -29302,6 +29311,7 @@ export namespace Cesium3DTileset {
         pointCloudShading?: any;
         lightColor?: Cartesian3;
         imageBasedLighting?: ImageBasedLighting;
+        environmentMapOptions?: DynamicEnvironmentMapManager.ConstructorOptions;
         backFaceCulling?: boolean;
         enableShowOutline?: boolean;
         showOutline?: boolean;
@@ -31696,7 +31706,7 @@ export namespace DynamicEnvironmentMapManager {
     /**
      * Options for the DynamicEnvironmentMapManager constructor
      * @property [enabled = true] - If true, the environment map and related properties will continue to update.
-     * @property [mipmapLevels = 10] - The number of mipmap levels to generate for specular maps. More mipmap levels will produce a higher resolution specular reflection.
+     * @property [mipmapLevels = 7] - The number of mipmap levels to generate for specular maps. More mipmap levels will produce a higher resolution specular reflection.
      * @property [maximumSecondsDifference = 3600] - The maximum amount of elapsed seconds before a new environment map is created.
      * @property [maximumPositionEpsilon = 1000] - The maximum difference in position before a new environment map is created, in meters. Small differences in position will not visibly affect results.
      * @property [atmosphereScatteringIntensity = 2.0] - The intensity of the scattered light emitted from the atmosphere. This should be adjusted relative to the value of {@link Scene.light} intensity.
@@ -34011,6 +34021,18 @@ export namespace ITwinData {
      * @param [rootDocument] - The path of the root document for this reality data
      */
     function createTilesetForRealityDataId(iTwinId: string, realityDataId: string, type?: ITwinPlatform.RealityDataType, rootDocument?: string): Promise<Cesium3DTileset>;
+    /**
+     * Create a data source of the correct type for the specified reality data id.
+     * This function only works for KML and GeoJSON type data.
+     *
+     * If the <code>type</code> or <code>rootDocument</code> are not provided this function
+     * will first request the full metadata for the specified reality data to fill these values.
+     * @param iTwinId - The id of the iTwin to load data from
+     * @param realityDataId - The id of the reality data to load
+     * @param [type] - The type of this reality data
+     * @param [rootDocument] - The path of the root document for this reality data
+     */
+    function createDataSourceForRealityDataId(iTwinId: string, realityDataId: string, type?: ITwinPlatform.RealityDataType, rootDocument?: string): Promise<GeoJsonDataSource | KmlDataSource>;
 }
 
 /**
@@ -37596,7 +37618,7 @@ export class Model {
      *
      * The given name may be the name of a glTF extension, like `"EXT_example_extension"`.
      * If the specified extension was present in the root of the underlying glTF asset,
-     * and a loder for the specified extension has processed the extension data, then
+     * and a loader for the specified extension has processed the extension data, then
      * this will return the model representation of the extension.
      * @param extensionName - The name of the extension
      * @returns The object, or `undefined`
