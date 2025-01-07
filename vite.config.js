@@ -33,8 +33,17 @@ export default defineConfig({
     },
     build:
     {
+        target: `esnext`,
         outDir: '../dist',
         emptyOutDir: true,
         sourcemap: true
+    },
+    esbuild: {
+        target: "es2022"
+    },
+    optimizeDeps:{
+        esbuildOptions: {
+            target: "es2022",
+        }
     }
 })

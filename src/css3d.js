@@ -62,7 +62,7 @@ const cameraElement = document.createElement( 'camera' )
 viewElement.appendChild( cameraElement )
 cameraElement.style.display = `inline-block`
 
-let nCount = 1000
+let nCount = 10 * 10000
 let objects = []
 // object
 for(let i = 0; i < nCount; i++) {
@@ -71,6 +71,7 @@ for(let i = 0; i < nCount; i++) {
     const element = document.createElement('object');
     cameraElement.appendChild(element)
     element.style.width = `300px`
+    element.style.display = `none`
     element.style.height = `500px`
     element.className = 'object';
     element.style.backgroundColor = 'rgba(0,127,127,0.25)'
@@ -82,6 +83,20 @@ for(let i = 0; i < nCount; i++) {
 
     objects.push(element)
 }
+
+// object
+for(let i = 0; i < nCount; i++) {
+
+    let modelMatrix = Cesium.Matrix4.fromTranslation(new Cesium.Cartesian3(position.x, position.y, position.z), new Cesium.Matrix4())
+    objects[i].style.transform = 'translate(-50%,-50%)' + `matrix3d(
+        ${modelMatrix[0]}, ${modelMatrix[1]}, ${modelMatrix[2]}, ${modelMatrix[3]},
+        ${-modelMatrix[4]}, ${-modelMatrix[5]}, ${-modelMatrix[6]}, ${-modelMatrix[7]},
+        ${modelMatrix[8]}, ${modelMatrix[9]}, ${modelMatrix[10]}, ${modelMatrix[11]},
+        ${modelMatrix[12]}, ${modelMatrix[13]}, ${modelMatrix[14]}, ${modelMatrix[15]}
+    )`
+}
+
+console.log("finish")
 
 function updateDiv() {
 
@@ -112,18 +127,6 @@ function updateDiv() {
     const style = perspective + cameraCSSMatrix + 'translate(' + 0.5 * canvas.clientWidth + 'px,' + 0.5 * canvas.clientHeight + 'px)'
     cameraElement.style.transform = style
 
-    // object
-    for(let i = 0; i < nCount; i++) {
-
-
-        let modelMatrix = Cesium.Matrix4.fromTranslation(new Cesium.Cartesian3(position.x, position.y, position.z), new Cesium.Matrix4())
-        objects[i].style.transform = 'translate(-50%,-50%)' + `matrix3d(
-        ${modelMatrix[0]}, ${modelMatrix[1]}, ${modelMatrix[2]}, ${modelMatrix[3]},
-        ${-modelMatrix[4]}, ${-modelMatrix[5]}, ${-modelMatrix[6]}, ${-modelMatrix[7]},
-        ${modelMatrix[8]}, ${modelMatrix[9]}, ${modelMatrix[10]}, ${modelMatrix[11]},
-        ${modelMatrix[12]}, ${modelMatrix[13]}, ${modelMatrix[14]}, ${modelMatrix[15]}
-    )`
-    }
 }
 
 let stats = new Stats()
