@@ -1,6 +1,6 @@
 import Cesium from "cesium";
 
-class CSS3DObject {
+export class CSS3DObject {
 
     constructor({name = 'divObject', viewer, position}) {
 
@@ -28,38 +28,36 @@ class CSS3DObject {
         )`
 
     }
+
+    debugPosition = function () {
+
+        let pt = this.viewer.entities.add({
+            id: "point",
+            position: this.position,
+            orientation: {
+                heading: 6.160507542478311,
+                pitch: -0.49982768408170264,
+                roll: 6.2826078347680285
+            },
+            point: {
+                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                pixelSize: 10,
+                color: Cesium.Color.RED,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 2,
+            },
+        });
+    }
+    
+    focus = function () {
+
+        this.viewer.camera.flyTo({
+            destination: this.position,
+            orientation: {
+                heading: 6.160507542478311,
+                pitch: -0.49982768408170264,
+                roll: 6.2826078347680285
+            }
+        })
+    }
 }
-
-CSS3DObject.debugPosition = function () {
-
-    let pt = this.viewer.entities.add({
-        id: "point",
-        position: this.position,
-        orientation: {
-            heading:  6.160507542478311,
-            pitch:  -0.49982768408170264,
-            roll: 6.2826078347680285
-        },
-        point: {
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-            pixelSize: 10,
-            color: Cesium.Color.RED,
-            outlineColor: Cesium.Color.WHITE,
-            outlineWidth: 2,
-        },
-    });
-}
-
-CSS3DObject.focus = function () {
-
-    this.viewer.camera.flyTo({
-        destination: this.position,
-        orientation:{
-            heading:  6.160507542478311,
-            pitch:  -0.49982768408170264,
-            roll: 6.2826078347680285
-        }
-    })
-}
-
-export default CSS3DObject
