@@ -26,6 +26,8 @@ export default defineConfig({
             ],
         }),
     ],
+    publicDir: '../static/',
+    base: './',
     server:
     {
         host: true,
