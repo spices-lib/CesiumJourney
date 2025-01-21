@@ -2,6 +2,7 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./style.css";
 import * as Cesium from "cesium";
 import Stats from "stats.js/src/Stats.js";
+import CSS3DObject from "./CSS3DObject.js";
 
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiYWY0MTM0MS0xOGU1LTQxZjUtYTllYy1iYjRkYjJkYzBlMDEiLCJpZCI6NTQ2NDksImlhdCI6MTYyMDEwMjgzOX0.cojh0KQbdymUPmIWIyCU8nCey6OrLQUk50aeirVpXtI";
 
@@ -22,28 +23,15 @@ const tileset = await Cesium.createGooglePhotorealistic3DTileset({
     onlyUsingWithGoogleGeocoder: true,
 })
 viewer.scene.primitives.add(tileset)
-
-let position = Cesium.Cartesian3.fromDegrees(60, 39.9, 1000)
 let canvas = document.getElementById("cesiumContainer")
-let pt = viewer.entities.add({
-    id: "point",
-    position: position,
-    point: {
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
-        pixelSize: 10,
-        color: Cesium.Color.RED,
-        outlineColor: Cesium.Color.WHITE,
-        outlineWidth: 2,
-    },
-});
-viewer.camera.flyTo({
-    destination: position,
-    orientation:{
-        heading:  6.160507542478311,
-        pitch:  -0.49982768408170264,
-        roll: 6.2826078347680285
-    }
+
+
+let obj = new CSS3DObject({
+    viewer: viewer,
+    position: new Cesium.Cartesian3.fromDegrees(60, 39.9, 1000)
 })
+obj.debugPosition()
+obj.focus()
 
 viewer.scene.requestRenderMode = true;
 
@@ -62,39 +50,8 @@ const cameraElement = document.createElement( 'camera' )
 viewElement.appendChild( cameraElement )
 cameraElement.style.display = `inline-block`
 
-let nCount = 10 * 10000
-let objects = []
 // object
-for(let i = 0; i < nCount; i++) {
-
-
-    const element = document.createElement('object');
-    cameraElement.appendChild(element)
-    element.style.width = `300px`
-    element.style.display = `none`
-    element.style.height = `500px`
-    element.className = 'object';
-    element.style.backgroundColor = 'rgba(0,127,127,0.25)'
-    element.style.position = 'absolute';
-    element.style.pointerEvents = 'auto';
-    element.style.userSelect = 'none';
-    element.setAttribute('draggable', false);
-    element.style.pointerEvents = `none`
-
-    objects.push(element)
-}
-
-// object
-for(let i = 0; i < nCount; i++) {
-
-    let modelMatrix = Cesium.Matrix4.fromTranslation(new Cesium.Cartesian3(position.x, position.y, position.z), new Cesium.Matrix4())
-    objects[i].style.transform = 'translate(-50%,-50%)' + `matrix3d(
-        ${modelMatrix[0]}, ${modelMatrix[1]}, ${modelMatrix[2]}, ${modelMatrix[3]},
-        ${-modelMatrix[4]}, ${-modelMatrix[5]}, ${-modelMatrix[6]}, ${-modelMatrix[7]},
-        ${modelMatrix[8]}, ${modelMatrix[9]}, ${modelMatrix[10]}, ${modelMatrix[11]},
-        ${modelMatrix[12]}, ${modelMatrix[13]}, ${modelMatrix[14]}, ${modelMatrix[15]}
-    )`
-}
+cameraElement.appendChild(obj.div)
 
 console.log("finish")
 
