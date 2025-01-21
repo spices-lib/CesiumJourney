@@ -1,38 +1,36 @@
-import Cesium from "cesium";
+import * as Cesium from "cesium";
 
 export class CSS3DObject {
 
-    constructor({name = 'divObject', viewer, position}) {
+    constructor({ name = 'divObject', viewer, position, rotation, scale }) {
 
         this.name = name
         this.viewer = viewer
-        this.position = position
 
-        this.div = document.createElement(this.name);
+        this.div = document.createElement(this.name)
         this.div.style.width = `300px`
         this.div.style.height = `500px`
         this.div.className = 'object';
         this.div.style.backgroundColor = 'rgba(0,127,127,0.25)'
-        this.div.style.position = 'absolute';
-        this.div.style.pointerEvents = 'auto';
-        this.div.style.userSelect = 'none';
-        this.div.setAttribute('draggable', false);
+        this.div.style.position = 'absolute'
+        this.div.style.pointerEvents = 'auto'
+        this.div.style.userSelect = 'none'
+        this.div.setAttribute('draggable', false)
         this.div.style.pointerEvents = `none`
 
-        let modelMatrix = Cesium.Matrix4.fromTranslation(new Cesium.Cartesian3(this.position.x, this.position.y, this.position.z), new Cesium.Matrix4())
-        this.div.style.transform = 'translate(-0%,-0%)' + `matrix3d(
-        ${modelMatrix[0]}, ${modelMatrix[1]}, ${modelMatrix[2]}, ${modelMatrix[3]},
-        ${-modelMatrix[4]}, ${-modelMatrix[5]}, ${-modelMatrix[6]}, ${-modelMatrix[7]},
-        ${modelMatrix[8]}, ${modelMatrix[9]}, ${modelMatrix[10]}, ${modelMatrix[11]},
-        ${modelMatrix[12]}, ${modelMatrix[13]}, ${modelMatrix[14]}, ${modelMatrix[15]}
-        )`
+        this.position = new Cesium.Cartesian3(0, 0, 0)
+        this.rotation = new Cesium.Cartesian3(0, 0, 0)
+        this.scale = new Cesium.Cartesian3(1, 1, 1)
+
+        this.setPosition(position)
+        this.setRotation(rotation)
+        this.setScale(scale)
 
     }
 
     debugPosition = function () {
 
         let pt = this.viewer.entities.add({
-            id: "point",
             position: this.position,
             orientation: {
                 heading: 6.160507542478311,
@@ -41,7 +39,7 @@ export class CSS3DObject {
             },
             point: {
                 disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                pixelSize: 10,
+                pixelSize: 2,
                 color: Cesium.Color.RED,
                 outlineColor: Cesium.Color.WHITE,
                 outlineWidth: 2,
@@ -60,4 +58,56 @@ export class CSS3DObject {
             }
         })
     }
+
+    updateModel = function() {
+
+        const qRotation = Cesium.Quaternion.fromHeadingPitchRoll(new Cesium.HeadingPitchRoll(this.rotation.x + this.alignRotation.x,  this.rotation.y + this.alignRotation.y,  this.rotation.z + this.alignRotation.z ), new Cesium.Quaternion())
+        const modelMatrix = Cesium.Matrix4.fromTranslationRotationScale(new Cesium.TranslationRotationScale(this.position, qRotation, this.scale), new Cesium.Matrix4())
+
+        this.div.style.transform = 'translate(-50%,-50%)' + `matrix3d(
+            ${modelMatrix[0]}, ${modelMatrix[1]}, ${modelMatrix[2]}, ${modelMatrix[3]},
+            ${-modelMatrix[4]}, ${-modelMatrix[5]}, ${-modelMatrix[6]}, ${-modelMatrix[7]},
+            ${modelMatrix[8]}, ${modelMatrix[9]}, ${modelMatrix[10]}, ${modelMatrix[11]},
+            ${modelMatrix[12]}, ${modelMatrix[13]}, ${modelMatrix[14]}, ${modelMatrix[15]}
+        )`
+
+    }
+
+    setPosition = function(position) {
+
+        // position
+        this.position = new Cesium.Cartesian3.fromDegrees(position.x, position.y, position.z)
+
+        // alignRotation
+        this.alignRotation = new Cesium.Cartesian3(0, 0, 0)
+        this.alignRotation.x = -position.x / 90.0 * Cesium.Math.toRadians(90.0)
+        this.alignRotation.z =  position.y / 90.0 * Cesium.Math.toRadians(90.0)
+
+        // update model matrix
+        this.updateModel()
+
+    }
+
+    setRotation = function(rotation) {
+
+        // rotation
+        this.rotation.x = Cesium.Math.toRadians(rotation.x)
+        this.rotation.y = Cesium.Math.toRadians(rotation.y)
+        this.rotation.z = Cesium.Math.toRadians(rotation.z)
+
+        // update model matrix
+        this.updateModel()
+
+    }
+
+    setScale = function(scale) {
+
+        // scale
+        this.scale = scale
+
+        // update model matrix
+        this.updateModel()
+
+    }
+
 }
