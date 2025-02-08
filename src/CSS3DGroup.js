@@ -9,6 +9,12 @@ export class CSS3DOGroup {
         this.div = document.createElement(name)
         this.div.style.display = `inline-block`
         this.div.style.transformStyle = 'preserve-3d';
+        this.div.style.position = `absolute`
+        this.div.style.top = `0`
+        this.div.style.left = `0`
+        this.div.style.transformOrigin = '0 0'
+        this.div.style.pointerEvents = 'none'
+        this.div.style.display = `inline-block`
 
         this.position = new Cesium.Cartesian3(0, 0, 0)
         this.rotation = new Cesium.Cartesian3(0, 0, 0)

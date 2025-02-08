@@ -9,7 +9,7 @@ export class CSS3DObject {
 
         this.div = document.createElement(this.name)
         this.div.style.width = `300px`
-        this.div.style.height = `300px`
+        this.div.style.height = `500px`
         this.div.className = 'object';
         this.div.style.backgroundColor = 'rgba(0,127,127,0.25)'
         this.div.style.position = 'absolute'
@@ -21,7 +21,7 @@ export class CSS3DObject {
         this.position = new Cesium.Cartesian3(0, 0, 0)
         this.rotation = new Cesium.Cartesian3(0, 0, 0)
         this.scale = new Cesium.Cartesian3(1, 1, 1)
-        this.offset = new Cesium.Cartesian2(0, 0)
+        this.offset = new Cesium.Cartesian2(50, 50)
 
         this.setPosition(position)
         this.setRotation(rotation)
@@ -65,16 +65,12 @@ export class CSS3DObject {
         const qRotation = Cesium.Quaternion.fromHeadingPitchRoll(new Cesium.HeadingPitchRoll(this.rotation.x + this.alignRotation.x,  this.rotation.y + this.alignRotation.y,  this.rotation.z + this.alignRotation.z ), new Cesium.Quaternion())
         const modelMatrix = Cesium.Matrix4.fromTranslationRotationScale(new Cesium.TranslationRotationScale(this.position, qRotation, this.scale), new Cesium.Matrix4())
 
-        this.div.style.transformOrigin = `${ this.offset.x }% ${ this.offset.y }%`
-
-        this.div.style.transform = `translate(-${ this.offset.x }%,-${ this.offset.y }%)` + `matrix3d(
+        this.div.style.transform = `translate(-${ 100 - this.offset.x }%,-${ this.offset.y }%)` + `matrix3d(
             ${modelMatrix[0]}, ${modelMatrix[1]}, ${modelMatrix[2]}, ${modelMatrix[3]},
             ${-modelMatrix[4]}, ${-modelMatrix[5]}, ${-modelMatrix[6]}, ${-modelMatrix[7]},
             ${modelMatrix[8]}, ${modelMatrix[9]}, ${modelMatrix[10]}, ${modelMatrix[11]},
             ${modelMatrix[12]}, ${modelMatrix[13]}, ${modelMatrix[14]}, ${modelMatrix[15]}
         )`
-
-
 
     }
 
@@ -119,6 +115,8 @@ export class CSS3DObject {
 
         // offset
         this.offset = offset
+
+        this.div.style.transformOrigin = `${ 100 - this.offset.x }% ${ this.offset.y }%`
 
         // update model matrix
         this.updateModel()
