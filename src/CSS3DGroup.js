@@ -30,7 +30,6 @@ export class CSS3DOGroup {
             ${modelMatrix[8]}, ${modelMatrix[9]}, ${modelMatrix[10]}, ${modelMatrix[11]},
             ${modelMatrix[12]}, ${modelMatrix[13]}, ${modelMatrix[14]}, ${modelMatrix[15]}
         )`
-
     }
 
     setPosition = function(position) {

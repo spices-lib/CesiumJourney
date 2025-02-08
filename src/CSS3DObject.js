@@ -2,14 +2,14 @@ import * as Cesium from "cesium";
 
 export class CSS3DObject {
 
-    constructor({ name = 'divObject', viewer, position, rotation, scale }) {
+    constructor({ name = 'divObject', viewer, position, rotation, scale, offset }) {
 
         this.name = name
         this.viewer = viewer
 
         this.div = document.createElement(this.name)
         this.div.style.width = `300px`
-        this.div.style.height = `500px`
+        this.div.style.height = `300px`
         this.div.className = 'object';
         this.div.style.backgroundColor = 'rgba(0,127,127,0.25)'
         this.div.style.position = 'absolute'
@@ -21,11 +21,12 @@ export class CSS3DObject {
         this.position = new Cesium.Cartesian3(0, 0, 0)
         this.rotation = new Cesium.Cartesian3(0, 0, 0)
         this.scale = new Cesium.Cartesian3(1, 1, 1)
+        this.offset = new Cesium.Cartesian2(0, 0)
 
         this.setPosition(position)
         this.setRotation(rotation)
         this.setScale(scale)
-
+        this.setOffset(offset)
     }
 
     debugPosition = function () {
@@ -46,7 +47,7 @@ export class CSS3DObject {
             },
         });
     }
-    
+
     focus = function () {
 
         this.viewer.camera.flyTo({
@@ -64,12 +65,16 @@ export class CSS3DObject {
         const qRotation = Cesium.Quaternion.fromHeadingPitchRoll(new Cesium.HeadingPitchRoll(this.rotation.x + this.alignRotation.x,  this.rotation.y + this.alignRotation.y,  this.rotation.z + this.alignRotation.z ), new Cesium.Quaternion())
         const modelMatrix = Cesium.Matrix4.fromTranslationRotationScale(new Cesium.TranslationRotationScale(this.position, qRotation, this.scale), new Cesium.Matrix4())
 
-        this.div.style.transform = 'translate(-50%,-50%)' + `matrix3d(
+        this.div.style.transformOrigin = `${ this.offset.x }% ${ this.offset.y }%`
+
+        this.div.style.transform = `translate(-${ this.offset.x }%,-${ this.offset.y }%)` + `matrix3d(
             ${modelMatrix[0]}, ${modelMatrix[1]}, ${modelMatrix[2]}, ${modelMatrix[3]},
             ${-modelMatrix[4]}, ${-modelMatrix[5]}, ${-modelMatrix[6]}, ${-modelMatrix[7]},
             ${modelMatrix[8]}, ${modelMatrix[9]}, ${modelMatrix[10]}, ${modelMatrix[11]},
             ${modelMatrix[12]}, ${modelMatrix[13]}, ${modelMatrix[14]}, ${modelMatrix[15]}
         )`
+
+
 
     }
 
@@ -104,6 +109,16 @@ export class CSS3DObject {
 
         // scale
         this.scale = scale
+
+        // update model matrix
+        this.updateModel()
+
+    }
+
+    setOffset = function(offset) {
+
+        // offset
+        this.offset = offset
 
         // update model matrix
         this.updateModel()

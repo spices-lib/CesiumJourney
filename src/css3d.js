@@ -36,25 +36,28 @@ canvas.appendChild( view.view );
 // object
 let objects = []
 
-for(let i = 0; i <= 90; i+= 4) {
-    for(let j = 0; j < 180; j+= 4) {
+for(let i = 0; i <= 1; i+= 4) {
+    for(let j = 0; j < 1; j+= 4) {
 
         let obj = new CSS3DObject({
             viewer: viewer,
-            position: new Cesium.Cartesian3(j, i, 1000),
+            position: new Cesium.Cartesian3(114.253, 23.872, 1000),
             rotation: new Cesium.Cartesian3(90, 0, 0),
-            scale: new Cesium.Cartesian3(500, 500, 500),
+            scale: new Cesium.Cartesian3(Cesium.Math.randomBetween(1, 1), Cesium.Math.randomBetween(1, 1), Cesium.Math.randomBetween(1, 1)),
+            offset: new Cesium.Cartesian2(0, 100),
         })
         obj.debugPosition()
 
         objects.push(obj)
+
+        view.camera.appendChild(obj.div)
     }
 }
 
 objects[0].focus()
 
 // group
-let group = new CSS3DOGroup({
+/*let group = new CSS3DOGroup({
     position: new Cesium.Cartesian3(0, 0, 0),
     rotation: new Cesium.Cartesian3(0, 0, 0),
     scale: new Cesium.Cartesian3(1, 1, 1),
@@ -62,7 +65,7 @@ let group = new CSS3DOGroup({
 
 group.appendChild(objects)
 
-view.camera.appendChild(group.div)
+view.camera.appendChild(group.div)*/
 
 console.log("finish")
 
